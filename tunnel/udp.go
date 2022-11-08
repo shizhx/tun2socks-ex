@@ -8,6 +8,7 @@ import (
 
 	"github.com/xjasonlyu/tun2socks/v2/common/pool"
 	"github.com/xjasonlyu/tun2socks/v2/core/adapter"
+	"github.com/xjasonlyu/tun2socks/v2/fakeip"
 	"github.com/xjasonlyu/tun2socks/v2/log"
 	M "github.com/xjasonlyu/tun2socks/v2/metadata"
 	"github.com/xjasonlyu/tun2socks/v2/proxy"
@@ -30,12 +31,13 @@ func handleUDPConn(uc adapter.UDPConn) {
 	defer uc.Close()
 
 	id := uc.ID()
+	realDstIP, realDstPort := fakeip.Resolve(net.IP(id.LocalAddress), id.LocalPort)
 	metadata := &M.Metadata{
 		Network: M.UDP,
 		SrcIP:   net.IP(id.RemoteAddress),
 		SrcPort: id.RemotePort,
-		DstIP:   net.IP(id.LocalAddress),
-		DstPort: id.LocalPort,
+		DstIP:   realDstIP,
+		DstPort: realDstPort,
 	}
 
 	pc, err := proxy.DialUDP(metadata)

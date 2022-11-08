@@ -10,6 +10,7 @@ import (
 
 	"github.com/xjasonlyu/tun2socks/v2/common/pool"
 	"github.com/xjasonlyu/tun2socks/v2/core/adapter"
+	"github.com/xjasonlyu/tun2socks/v2/fakeip"
 	"github.com/xjasonlyu/tun2socks/v2/log"
 	M "github.com/xjasonlyu/tun2socks/v2/metadata"
 	"github.com/xjasonlyu/tun2socks/v2/proxy"
@@ -28,12 +29,13 @@ func handleTCPConn(localConn adapter.TCPConn) {
 	defer localConn.Close()
 
 	id := localConn.ID()
+	realDstIP, realDstPort := fakeip.Resolve(net.IP(id.LocalAddress), id.LocalPort)
 	metadata := &M.Metadata{
 		Network: M.TCP,
 		SrcIP:   net.IP(id.RemoteAddress),
 		SrcPort: id.RemotePort,
-		DstIP:   net.IP(id.LocalAddress),
-		DstPort: id.LocalPort,
+		DstIP:   realDstIP,
+		DstPort: realDstPort,
 	}
 
 	targetConn, err := proxy.Dial(metadata)

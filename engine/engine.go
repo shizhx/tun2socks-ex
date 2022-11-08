@@ -16,6 +16,7 @@ import (
 	"github.com/xjasonlyu/tun2socks/v2/core/device"
 	"github.com/xjasonlyu/tun2socks/v2/core/option"
 	"github.com/xjasonlyu/tun2socks/v2/engine/mirror"
+	"github.com/xjasonlyu/tun2socks/v2/fakeip"
 	"github.com/xjasonlyu/tun2socks/v2/log"
 	"github.com/xjasonlyu/tun2socks/v2/proxy"
 	"github.com/xjasonlyu/tun2socks/v2/restapi"
@@ -168,6 +169,8 @@ func netstack(k *Key) (err error) {
 		return
 	}
 
+	fakeip.Init(k.FakeIP)
+
 	var opts []option.Option
 	if k.TCPModerateReceiveBuffer {
 		opts = append(opts, option.WithTCPModerateReceiveBuffer(true))
@@ -205,5 +208,6 @@ func netstack(k *Key) (err error) {
 		_defaultDevice.Type(), _defaultDevice.Name(),
 		_defaultProxy.Proto(), _defaultProxy.Addr(),
 	)
+	log.Infof("[STACK] FakeIP: %v", k.FakeIP)
 	return nil
 }
